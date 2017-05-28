@@ -1,0 +1,134 @@
+{
+    "rules": {
+        "world-size": [
+            2400,
+            600
+        ],
+        "background-color": [
+            43,
+            204,
+            236
+        ]
+    },
+    "platforms": [
+        {
+            "y": 200, 
+            "x": 500, 
+            "type": "ColumnPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 200, 
+            "x": 2200, 
+            "type": "ColumnPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 250, 
+            "x": 350, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 300, 
+            "x": 200, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 500, 
+            "x": 180, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 400, 
+            "x": 90, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 250, 
+            "x": 790, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 300, 
+            "x": 940, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 500, 
+            "x": 960, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 400, 
+            "x": 1050, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 400, 
+            "x": 1950, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 300, 
+            "x": 2100, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 200, 
+            "x": 1950, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 100, 
+            "x": 2100, 
+            "type": "BoxPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 500, 
+            "x": 1300, 
+            "type": "StandardPlatform",
+            "height": null,
+            "width": null
+        }, 
+        {
+            "y": 450, 
+            "x": 1600, 
+            "type": "StandardPlatform",
+            "height": null,
+            "width": null
+        },
+        {
+            "y": 580,
+            "x": 0,
+            "type": "FloorPlatform",
+            "height": 600,
+            "width": 2400
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+    "types": {
+        "BoxPlatform": {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "width": 60, 
+            "height": 30
+        }, 
+        "FloorPlatform": {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "width": null,
+            "height": null
+        }, 
+        "ColumnPlatform": {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "width": 200, 
+            "height": 800
+        }, 
+        "StandardPlatform": {
+            "color": [
+                50,
+                120,
+                60
+            ],
+            "width": 300,
+            "height": 30
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "rules": {
+        "world-size": [
+            2400, 
+            600
+        ], 
+        "background-color": [
+            194, 
+            158, 
+            255
+        ]
+    }, 
+    "platforms": [
+        {
+            "y": 580,
+            "x": 0,
+            "type": "FloorPlatform",
+            "height": 600,
+            "width": 2400
+        }
+    ]
+}

@@ -1,0 +1,92 @@
+{
+    "rules": {
+        "world-size": [
+            2400, 
+            600
+        ], 
+        "background-color": [
+            57, 
+            255, 
+            189
+        ]
+    }, 
+    "platforms": [
+        {
+            "y": 260, 
+            "x": 0, 
+            "height": null, 
+            "type": "ColumnPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 260, 
+            "x": 2200, 
+            "height": null, 
+            "type": "ColumnPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 580, 
+            "x": 0, 
+            "height": 600, 
+            "type": "FloorPlatform", 
+            "width": 2400
+        }, 
+        {
+            "y": 320, 
+            "x": 200, 
+            "height": null, 
+            "type": "ColumnPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360, 
+            "x": 400, 
+            "height": null, 
+            "type": "ColumnPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360, 
+            "x": 600, 
+            "height": null, 
+            "type": "StandardPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360, 
+            "x": 1200, 
+            "height": null, 
+            "type": "StandardPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360.0, 
+            "x": 1500.0, 
+            "height": null, 
+            "type": "StandardPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360, 
+            "x": 1020, 
+            "height": null, 
+            "type": "BoxPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 360, 
+            "x": 1850, 
+            "height": null, 
+            "type": "StandardPlatform", 
+            "width": null
+        }, 
+        {
+            "y": 290, 
+            "x": 2120, 
+            "height": null, 
+            "type": "BoxPlatform", 
+            "width": null
+        }
+    ]
+}
