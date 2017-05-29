@@ -45,6 +45,8 @@ class Scene(QGraphicsScene):
         self.selector_selected_platform = None
         self.selector_old_colors = {}  # stores the old color of the platform after the mouse is no longer on it
         self.selector_SELECTED_COLOR = '#990000'
+        self.mouse_pressed = False
+        self.prev_mouse_pos = None
 
         # General Initialization
         self.reset_design()
@@ -68,12 +70,45 @@ class Scene(QGraphicsScene):
 
         return x, y
 
+    # takes in an x and a y and returns a QPointF
+    def return_pos(self, x, y):
+        return Core.QPointF(x, y)
+
     # resets the dictionary that holds all of information about the design
     def reset_design(self):
 
-        self.design = {
-            "platforms": []
+        self.design = self.create_initial_design()
+
+    def initialize_json_design(self):
+
+        design = {
+            "platforms": [],
+            "rules": {}
         }
+
+        return design
+
+    def create_initial_design(self):
+        default_design = self.initialize_json_design()
+        self.add_initial_rules_to_design(default_design)
+        self.add_platform_to_design(default_design,
+                                    "FloorPlatform",
+                                    0, GLOBALS.world_size[1] - GLOBALS.floor_height,
+                                    default_design["rules"]["world-size"][0], default_design["rules"]["world-size"][1])
+        return default_design
+
+    def add_initial_rules_to_design(self, design):
+
+        design["rules"].update(
+            {
+                "background-color": GLOBALS.SKY_BLUE,
+                "world-size": GLOBALS.world_size
+            }
+        )
+
+    def add_rules_to_design(self, design, rules):
+
+        design["rules"].update(rules)
 
     # removes all items from the list of canvas items and resets the dictionary
     # that holds the current design
@@ -82,7 +117,7 @@ class Scene(QGraphicsScene):
         for item in self.items():
             self.removeItem(item)
 
-        self.reset_design()
+        self.design = self.initialize_json_design()
 
     # takes in a dictionary filled with platform data and adds all of them
     # to the list of items being drawn by the canvas and also adding them
@@ -90,10 +125,21 @@ class Scene(QGraphicsScene):
     # this is useful for opening pre-existing files to edit them
     def add_all_items(self, new_data):
 
+        self.add_rules_to_design(self.design, new_data["rules"])
+        self.add_background()
+
         for platform in new_data["platforms"]:
 
-            width = self.data["types"][platform["type"]]["width"]
-            height = self.data["types"][platform["type"]]["height"]
+            if platform["width"] is None:
+                width = self.data["types"][platform["type"]]["width"]
+            else:
+                width = platform["width"]
+
+            if platform["height"] is None:
+                height = self.data["types"][platform["type"]]["height"]
+            else:
+                height = platform["height"]
+
             color = self.data["types"][platform["type"]]["color"]
 
             self.add_platform(platform["x"],
@@ -101,34 +147,50 @@ class Scene(QGraphicsScene):
                               width,
                               height,
                               convert_color_to_hex(tuple(color)))
-            self.add_platform_to_design(platform["type"], platform["x"], platform["y"])
+            self.add_platform_to_design(self.design, platform["type"], platform["x"], platform["y"], platform["width"], platform["height"])
 
     # function that adds the default floor as to speed up the designing process
     def add_default_floor(self):
 
         # adding the default floor
         floor_platform = self.data["types"]["FloorPlatform"]
-        floor = QGraphicsRectItem(0, GLOBALS.world_size[1] - GLOBALS.floor_height, floor_platform["width"],
-                                  floor_platform["height"])
-        floor.setPen(self.outlinepen)
-        floor.setBrush(QBrush(QColor(convert_color_to_hex(tuple(floor_platform["color"])))))
-        self.addItem(floor)
-        self.add_platform_to_design("FloorPlatform", 0, GLOBALS.world_size[1] - GLOBALS.floor_height)
+        self.floor = QGraphicsRectItem(0, GLOBALS.world_size[1] - GLOBALS.floor_height,
+                                       self.design["rules"]["world-size"][0],
+                                       self.design["rules"]["world-size"][1])
+        self.floor.setPen(self.outlinepen)
+        self.floor.setBrush(QBrush(QColor(convert_color_to_hex(tuple(floor_platform["color"])))))
+        self.addItem(self.floor)
 
     # adds the background to the list of items being drawn by the canvas
     def add_background(self):
 
+        # sets the scene rect to the default world size, this should be changeable
+        self.setSceneRect(0, 0, self.design["rules"]["world-size"][0], self.design["rules"]["world-size"][1])
+
         # add the background, this color will be easily changed
-        self.background = QGraphicsRectItem(0, 0, GLOBALS.world_size[0], GLOBALS.world_size[1])
+        self.background = QGraphicsRectItem(0, 0, self.design["rules"]["world-size"][0],
+                                            self.design["rules"]["world-size"][1])
         self.background.setPen(self.outlinepen)
-        self.background.setBrush(QBrush(QColor(convert_color_to_hex(GLOBALS.SKY_BLUE))))
+        self.background.setBrush(QBrush(QColor(convert_color_to_hex(tuple(self.design["rules"]["background-color"])))))
         self.addItem(self.background)
+
+    def remove_floor(self):
+
+        self.removeItem(self.floor)
+        self.remove_floor_from_design()
+
+    def remove_floor_from_design(self):
+
+        platform_to_remove = None
+        for platform in self.design["platforms"]:
+            if platform["type"] == "FloorPlatform":
+                platform_to_remove = platform
+                break
+
+        self.design["platforms"].remove(platform_to_remove)
 
     # initializes the canvas scene
     def initialize_scene(self):
-
-        # sets the scene rect to the default world size, this should be changeable
-        self.setSceneRect(0, 0, GLOBALS.world_size[0], GLOBALS.world_size[1])
 
         self.installEventFilter(self)
 
@@ -139,7 +201,8 @@ class Scene(QGraphicsScene):
     # items that is currently being displayed by the canvas scene
     def add_platform(self, x, y, width, height, color, return_platform=False):
 
-        platform = QGraphicsRectItem(x, y, width, height)
+        platform = QGraphicsRectItem(0, 0, width, height)
+        platform.setPos(x, y)
 
         platform.setPen(self.outlinepen)
         platform.setBrush(QBrush(QColor(color)))
@@ -175,15 +238,17 @@ class Scene(QGraphicsScene):
     # handles the data and adds the platform that was placed to the
     # dictionary containing all information about the level that is
     # being currently built so that it can be exported later
-    def add_platform_to_design(self, platform_type, x, y):
+    def add_platform_to_design(self, design, platform_type, x, y, width, height):
 
         x, y = self.get_snap_coordinates(x, y)
 
-        self.design["platforms"].append(
+        design["platforms"].append(
             {
                 "type": platform_type,
                 "x": x,
-                "y": y
+                "y": y,
+                "width": width,
+                "height": height
             }
         )
 
@@ -193,6 +258,18 @@ class Scene(QGraphicsScene):
         if self.shadow is not None:
             self.removeItem(self.shadow)
             self.shadow = None
+
+    # when a platform is dragged by the selector, this function will look for
+    # the old platform in the current design and change its coordinates to
+    # where the platform is currently placed on the canvas scene
+    def adjust_selected_platform_coordinates(self, old_x, old_y):
+        pos = self.selector_selected_platform.pos()
+
+        for platform in self.design["platforms"]:
+            if old_x == platform["x"] and old_y == platform["y"]:
+                platform["x"] = pos.x()
+                platform["y"] = pos.y()
+                break
 
     # depending on what tool is selected the mouse move event function
     # will behave differently, so this is a series of conditionals looking
@@ -211,6 +288,16 @@ class Scene(QGraphicsScene):
             self.mouse_press_placer_event(event)
         elif self.designer.tool == "Selector":
             self.mouse_press_selector_event(event)
+            self.mouse_pressed = True
+            x, y = self.get_snap_coordinates(event.scenePos().x(), event.scenePos().y())
+            self.prev_mouse_pos = self.return_pos(x, y)
+
+    # waits for a mouse release event and applies the appropriate behavior based on
+    # what tool is currently selected
+    def mouseReleaseEvent(self, event):
+        if self.designer.tool == "Selector":
+            self.mouse_pressed = False
+            self.prev_mouse_pos = None
 
     # mouse move event behavior for the placer tool
     def mouse_move_placer_event(self, event):
@@ -226,9 +313,12 @@ class Scene(QGraphicsScene):
     def mouse_press_placer_event(self, event):
         if self.placer_selected_platform is not None:
             self.add_platform_to_scene(event)
-            self.add_platform_to_design(self.placer_selected_platform,
+            self.add_platform_to_design(self.design,
+                                        self.placer_selected_platform,
                                         int(event.scenePos().x()),
-                                        int(event.scenePos().y()))
+                                        int(event.scenePos().y()),
+                                        None,
+                                        None)
 
     # restoring color to any potential platforms that the user hovered over but
     # is no longer hovering over
@@ -270,12 +360,34 @@ class Scene(QGraphicsScene):
 
     # mouse move event behavior for the selector tool
     def mouse_move_selector_event(self, event):
-        pos = event.scenePos()
+        if not self.mouse_pressed:
+            pos = event.scenePos()
 
-        platform = self.itemAt(pos)
+            platform = self.itemAt(pos)
 
-        self.restore_color_to_other_platforms(platform)
-        self.apply_hover_effect_onto_platform(platform)
+            self.restore_color_to_other_platforms(platform)
+            self.apply_hover_effect_onto_platform(platform)
+        else:
+            self.drag_selected_platform(event)
+
+    # allows you to drag the platform that was just selected to a new position
+    def drag_selected_platform(self, event):
+        if self.selector_selected_platform is not None:
+            pos = event.scenePos()
+            x, y = self.get_snap_coordinates(pos.x(), pos.y())
+
+            old_x = self.selector_selected_platform.x()
+            old_y = self.selector_selected_platform.y()
+
+            mouse_displacement_x = x - self.prev_mouse_pos.x()
+            mouse_displacement_y = y - self.prev_mouse_pos.y()
+
+            self.selector_selected_platform.setPos(self.selector_selected_platform.x() + mouse_displacement_x,
+                                                   self.selector_selected_platform.y() + mouse_displacement_y)
+
+            self.adjust_selected_platform_coordinates(old_x, old_y)
+
+            self.prev_mouse_pos = Core.QPointF(x, y)
 
     # deselects the selected platform by changing its color and opacity
     # back to normal and setting selected platform back to None
@@ -314,7 +426,12 @@ class Scene(QGraphicsScene):
     # are drawn on the canvas but were not actually placed anywhere
     def eventFilter(self, watched, event):
         if event.type() == Core.QEvent.Leave:
-            self.remove_shadow()
+            if self.designer.tool == "Placer":
+                self.remove_shadow()
+            elif self.designer.tool == "Selector":
+                if self.hovered_over_platform is not None:
+                    self.select_hovered_over_platform()
+                    self.deselect_selected_platform()
             return True
         else:
             return False
@@ -337,6 +454,7 @@ class Designer(QWidget):
         self.tool = "Placer"
         self.initialize_interface()
 
+    # center the GUI on the desktop when it is first launched
     def center_screen(self):
         # get the geometry features of the desktop
         desktop_geometry = self.application.desktop().screenGeometry()
@@ -346,10 +464,12 @@ class Designer(QWidget):
         # move the main window to those values
         self.move(x, y)
 
+    # export the current canvas design into a file with the passed in filename
     def export_level(self, filename):
         with open(filename, "w") as name:
             json.dump(self.canvas_scene.design, name, indent=4)
 
+    # toggle the button selection, this function treats regular buttons like radio buttons
     def toggle_selection(self, button):
         # since a button has just been press, change any button that is
         # flat back to its default state
@@ -362,6 +482,17 @@ class Designer(QWidget):
         # store the platform text of the selected platform type
         self.canvas_scene.placer_selected_platform = button.text()
 
+    # listens for the user to close the GUI and checks whether a save warning message should be applied
+    def closeEvent(self, event):
+
+        response = self.apply_save_warning_message()
+
+        if response == QMessageBox.Cancel:
+            event.ignore()
+        else:
+            event.accept()
+
+    # initializes the left frame which is composed of the prebuilt platform options
     def initialize_left_frame(self):
 
         # initialize a group box to place the platform buttons
@@ -421,6 +552,7 @@ class Designer(QWidget):
         # the scrollable area and all of it's contents
         self.left_frame.setLayout(layout)
 
+    # initialize the canvas scene with all of its elements
     def initialize_canvas(self):
 
         self.canvas = QGraphicsView()
@@ -437,11 +569,78 @@ class Designer(QWidget):
 
         self.middle_layout.addWidget(self.canvas)
 
+    # applies the necessary QFileDialog depending on the circumstances of the current design
+    # and any loaded files. This function will return the response that the user chose so other
+    # functions can choose how to act after the message box independently. This function will
+    # return None if no warning message was necessary to appear
+    def apply_save_warning_message(self):
+
+        msgBox = QMessageBox()
+        msgBox.setText("This level as been modified.")
+        msgBox.setInformativeText("Do you want to save your changes?")
+        msgBox.setStandardButtons(QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+        msgBox.setDefaultButton(QMessageBox.Save)
+
+        default_design = self.canvas_scene.create_initial_design()
+        if self.filename is None and not self.canvas_scene.design == default_design:
+            ret = msgBox.exec_()
+
+            # open the save file dialog and then reset the scene
+            if ret == QMessageBox.Save:
+                self.save_as()
+
+            return ret
+
+        elif self.filename is None:
+            return None
+
+        else:
+            with open(self.filename) as filename:
+                data = json.load(filename)
+
+            file_data, designer_data = json.dumps(data, sort_keys=True),\
+                                       json.dumps(self.canvas_scene.design, sort_keys=True)
+
+            if not file_data == designer_data:
+
+                ret = msgBox.exec_()
+
+                if ret == QMessageBox.Save:
+                    self.save()
+
+                return ret
+            else:
+                return None
+
+    # the new file action, this will display the save warning message if it is appropriate
+    # and then will proceed to reset the canvas scene and design if it should
+    def new_file(self):
+        response = self.apply_save_warning_message()
+
+        # if the user did not cancel then reset the scene
+        if not response == QMessageBox.Cancel:
+            self.canvas_scene = Scene(self)
+            self.filename = None
+            self.canvas_scene.reset_design()
+            self.canvas_scene.add_default_floor()
+            self.setWindowTitle("Level Designer")
+        else:
+            pass
+
+    # this lets the user open an existing file
     def open_file(self):
+
+        response = self.apply_save_warning_message()
+        if response == QMessageBox.Cancel:
+            return
 
         filename_attributes = QFileDialog.getOpenFileName(
             self, "Open File", "../levels", selectedFilter="*.stg"
         )
+
+        if filename_attributes[0] == "":
+            return
+
         self.filename = filename_attributes[0]
         self.setWindowTitle("Level Designer - {}".format(self.filename))
 
@@ -449,34 +648,42 @@ class Designer(QWidget):
             new_level_data = json.load(name)
 
         self.canvas_scene.remove_all_items()
-        self.canvas_scene.add_background()
         self.canvas_scene.add_all_items(new_level_data)
 
+    # saves the current file
     def save(self):
         if self.filename is None:
             self.save_as()
         else:
             self.export_level(self.filename)
 
+    # opens the save as dialog to let the user save their design
     def save_as(self):
 
         filename_attributes = QFileDialog.getSaveFileName(
             self, "Save File", "../levels", selectedFilter="*.stg"
         )
+
+        if filename_attributes[0] == "":
+            return
+
         self.filename = filename_attributes[0]
         self.export_level(self.filename)
         self.setWindowTitle("Level Designer - {}".format(self.filename))
 
+    # toggles snap on and off if the user clicks on 'snap on' or 'snap off' in the edit menu
     def toggle_snap(self, action):
 
         self.canvas_scene.snap_on = not self.canvas_scene.snap_on
         action.setChecked(self.canvas_scene.snap_on)
 
+    # applies the newly selected snap if the user pressed "apply" on the snap adjustment window
     def snap_adjustment_window_allow_action(self, entry):
 
         self.canvas_scene.snap_strength = int(entry.text())
         self.snap_pop_up_window.close()
 
+    # opens up the snap adjustment window to allow the user to modify the snap strength
     def snap_adjustment_window(self):
 
         self.snap_pop_up_window = QWidget()
@@ -518,23 +725,125 @@ class Designer(QWidget):
 
         self.snap_pop_up_window.show()
 
+    def world_size_adjustment_window(self):
+
+        self.world_size_pop_up_window = QWidget()
+        self.world_size_pop_up_window.setWindowTitle("World Size Adjustment")
+
+        overall_layout = QVBoxLayout()
+
+        self.world_size_pop_up_window.setLayout(overall_layout)
+
+        header_layout = QHBoxLayout()
+        header_frame = QWidget()
+        header_frame.setLayout(header_layout)
+
+        main_label = QLabel("World Size")
+        header_layout.addWidget(main_label)
+
+        bottom_layout = QHBoxLayout()
+        bottom_frame = QWidget()
+        bottom_frame.setLayout(bottom_layout)
+
+        bottom_left_layout = QVBoxLayout()
+        bottom_left_frame = QWidget()
+        bottom_left_frame.setLayout(bottom_left_layout)
+
+        x_row_layout = QHBoxLayout()
+        x_row_frame = QWidget()
+        x_row_frame.setLayout(x_row_layout)
+
+        x_label = QLabel("x: ")
+        x_row_layout.addWidget(x_label)
+
+        x_line_edit = QLineEdit()
+        x_line_edit.setText(str(self.canvas_scene.design["rules"]["world-size"][0]))
+        x_line_edit.setAlignment(Core.Qt.AlignHCenter)
+        x_row_layout.addWidget(x_line_edit)
+
+        bottom_left_layout.addWidget(x_row_frame)
+
+        y_row_layout = QHBoxLayout()
+        y_row_frame = QWidget()
+        y_row_frame.setLayout(y_row_layout)
+
+        y_label = QLabel("y: ")
+        y_row_layout.addWidget(y_label)
+
+        y_line_edit = QLineEdit()
+        y_line_edit.setText(str(self.canvas_scene.design["rules"]["world-size"][1]))
+        y_line_edit.setAlignment(Core.Qt.AlignHCenter)
+        y_row_layout.addWidget(y_line_edit)
+
+        bottom_left_layout.addWidget(y_row_frame)
+
+        bottom_layout.addWidget(bottom_left_frame)
+
+        resize_floor_check_button = QCheckBox("Resize Floor")
+        resize_floor_check_button.setChecked(True)
+
+        apply_button = QPushButton("Apply")
+        apply_button.clicked.connect(lambda x=x_line_edit,
+                                            y=y_line_edit,
+                                            resize=resize_floor_check_button:
+                                     self.adjust_world_size(x, y, resize))
+
+        bottom_layout.addWidget(apply_button)
+
+        overall_layout.addWidget(header_frame)
+        overall_layout.addWidget(bottom_frame)
+        overall_layout.addWidget(resize_floor_check_button)
+
+        self.world_size_pop_up_window.show()
+
+    def adjust_world_size(self, x_entry, y_entry, resize):
+
+        self.canvas_scene.design["rules"]["world-size"] = [int(x_entry.text()), int(y_entry.text())]
+        x, y, width, height = 0, 0, self.canvas_scene.design["rules"]["world-size"][0],\
+                                    self.canvas_scene.design["rules"]["world-size"][1]
+
+        self.canvas_scene.setSceneRect(x, y, width, height)
+        self.canvas_scene.background.setRect(x, y, width, height)
+
+        if resize.isChecked():
+            self.canvas_scene.remove_floor()
+            self.canvas_scene.add_default_floor()
+            self.canvas_scene.add_platform_to_design(self.canvas_scene.design,
+                                                    "FloorPlatform",
+                                                    0, GLOBALS.world_size[1] - GLOBALS.floor_height,
+                                                    width, height)
+        self.world_size_pop_up_window.close()
+
+    def background_color_window(self):
+
+        color = QColorDialog.getColor()
+        if color == QColor():
+            return
+        else:
+            self.canvas_scene.background.setBrush(QBrush(color))
+            color_rgb = [color.red(), color.green(), color.blue()]
+            self.canvas_scene.design["rules"]["background-color"] = color_rgb
+
+    # deletes the platform that is selected by the selector from the canvas design
     def delete_selected_platform_from_design(self):
 
-        rect = self.canvas_scene.selector_selected_platform.rect()
+        pos = self.canvas_scene.selector_selected_platform.pos()
 
         item_to_delete = None
         for platform in self.canvas_scene.design["platforms"]:
-            if rect.x() == platform["x"] and rect.y() == platform["y"]:
+            if pos.x() == platform["x"] and pos.y() == platform["y"]:
                 item_to_delete = platform
                 break
 
         self.canvas_scene.design["platforms"].remove(item_to_delete)
 
-    def delete_platform(self):
+    # deletes the platform that is selected by the selector from the canvas scene and design
+    def delete_selected_platform(self):
 
         self.canvas_scene.removeItem(self.canvas_scene.selector_selected_platform)
         self.delete_selected_platform_from_design()
 
+    # enables the delete action only if a platform is selected
     def toggle_delete_action(self, enable_or_disable):
 
         for action in self.edit_menu.actions():
@@ -542,9 +851,14 @@ class Designer(QWidget):
                 action.setEnabled(enable_or_disable)
                 break
 
+    # initializes the file menu and all of its actions
     def initialize_file_menu(self):
 
         self.file_menu = self.main_menu.addMenu('&File')
+
+        new_action = QAction('New', self)
+        new_action.triggered.connect(self.new_file)
+        new_action.setShortcut('ctrl+n')
 
         open_action = QAction('Open', self)
         open_action.triggered.connect(self.open_file)
@@ -558,10 +872,12 @@ class Designer(QWidget):
         save_as_action.triggered.connect(self.save_as)
         save_as_action.setShortcut('ctrl+shift+s')
 
+        self.file_menu.addAction(new_action)
         self.file_menu.addAction(open_action)
         self.file_menu.addAction(save_action)
         self.file_menu.addAction(save_as_action)
 
+    # initializes the edit menu and all of its actions
     def initialize_edit_menu(self):
 
         self.edit_menu = self.main_menu.addMenu('&Edit')
@@ -573,13 +889,23 @@ class Designer(QWidget):
         snap_intensity_adjustment = QAction('Set Snap Strength', self)
         snap_intensity_adjustment.triggered.connect(self.snap_adjustment_window)
 
+        background_color_adjustment = QAction('Change Background Color', self)
+        background_color_adjustment.triggered.connect(self.background_color_window)
+        background_color_adjustment.setShortcut("Ctrl+Shift+C")
+
+        world_size_adjustment = QAction('Adjust World Size', self)
+        world_size_adjustment.triggered.connect(self.world_size_adjustment_window)
+        world_size_adjustment.setShortcut("Ctrl+Shift+W")
+
         delete = QAction('Delete', self)
-        delete.triggered.connect(self.delete_platform)
+        delete.triggered.connect(self.delete_selected_platform)
         delete.setShortcut("Ctrl+d")
         delete.setEnabled(False)
 
         self.edit_menu.addAction(snap_toggle)
         self.edit_menu.addAction(snap_intensity_adjustment)
+        self.edit_menu.addAction(background_color_adjustment)
+        self.edit_menu.addAction(world_size_adjustment)
         self.edit_menu.addAction(delete)
 
     # initializes the menu bar and adds it to the GUI
@@ -625,17 +951,23 @@ class Designer(QWidget):
     # if the placer has just been checked, enable the platform list
     # on the left side of the screen, otherwise disable it
     def toggle_placer(self, placer):
+        for button in self.selection:
+            button.setFlat(False)
+
+        self.canvas_scene.placer_selected_platform = None
         self.left_box.setEnabled(placer.isChecked())
 
-    # nothing for now
+    # deselects the platform that is selected if it is selected
     def toggle_selector(self, selector):
-        pass
+        if self.canvas_scene.selector_selected_platform is not None:
+            self.canvas_scene.deselect_selected_platform()
 
+    # selected the initial tool that should be selected
     def initialize_starting_action(self, action):
-
         action.setChecked(True)
         self.tool_action = action
 
+    # initializes the toolbar and all of its actions
     def initialize_toolbar(self):
 
         self.tool_bar = QToolBar()
@@ -653,12 +985,16 @@ class Designer(QWidget):
 
         self.main_layout.addWidget(self.tool_bar)
 
+    # initialize the general GUI
     def initialize_interface(self):
 
         # Set the window title
         self.setWindowTitle("Level Designer")
         # Set the gui icon
         self.setWindowIcon(QIcon('images/builder.jpg'))
+
+        # create a shortcut that activates the close event
+        QShortcut(QKeySequence("ctrl+q"), self, self.close)
 
         # Creating the layout for the MAIN WINDOW
         self.main_layout = QVBoxLayout()
