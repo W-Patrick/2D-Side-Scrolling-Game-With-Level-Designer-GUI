@@ -8,16 +8,7 @@
             ], 
             "width": 60, 
             "height": 30
-        }, 
-        "FloorPlatform": {
-            "color": [
-                50, 
-                120, 
-                60
-            ], 
-            "width": null,
-            "height": null
-        }, 
+        },
         "ColumnPlatform": {
             "color": [
                 50, 

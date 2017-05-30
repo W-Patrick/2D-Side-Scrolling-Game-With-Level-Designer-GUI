@@ -1,22 +1,27 @@
 {
     "rules": {
         "world-size": [
-            2400,
+            2400, 
             600
-        ],
+        ], 
         "background-color": [
-            43,
-            204,
+            43, 
+            204, 
             236
         ]
-    },
+    }, 
     "platforms": [
         {
-            "y": 580,
-            "x": 0,
-            "type": "FloorPlatform",
-            "height": 600,
-            "width": 2400
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 600, 
+            "width": 2400, 
+            "y": 580, 
+            "x": 0, 
+            "type": "FloorPlatform"
         }
     ]
 }

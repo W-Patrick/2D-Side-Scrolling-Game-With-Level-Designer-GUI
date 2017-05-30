@@ -4,8 +4,7 @@ import json
 from PySide.QtGui import *
 import PySide.QtCore as Core
 
-sys.path.append("../")
-import GLOBALS
+import DEFAULTS
 
 
 # converts a tuple that holds rgb values into
@@ -25,13 +24,13 @@ class Scene(QGraphicsScene):
     def __init__(self, designer):
         super(Scene, self).__init__()
 
-        with open("../platforms.json") as filename:
+        with open("platforms.json") as filename:
             self.data = json.load(filename)
 
         # General attributes used by all tools
         self.designer = designer
         self.designer.canvas.setScene(self)
-        self.outlinepen = QPen(QColor(convert_color_to_hex(GLOBALS.BLACK)))
+        self.outlinepen = QPen(QColor(convert_color_to_hex(DEFAULTS.BLACK)))
         self.design = None
 
         # Used by the placer tool
@@ -93,16 +92,17 @@ class Scene(QGraphicsScene):
         self.add_initial_rules_to_design(default_design)
         self.add_platform_to_design(default_design,
                                     "FloorPlatform",
-                                    0, GLOBALS.world_size[1] - GLOBALS.floor_height,
-                                    default_design["rules"]["world-size"][0], default_design["rules"]["world-size"][1])
+                                    0, DEFAULTS.world_size[1] - DEFAULTS.floor_height,
+                                    default_design["rules"]["world-size"][0], default_design["rules"]["world-size"][1],
+                                    DEFAULTS.platform_color)
         return default_design
 
     def add_initial_rules_to_design(self, design):
 
         design["rules"].update(
             {
-                "background-color": GLOBALS.SKY_BLUE,
-                "world-size": GLOBALS.world_size
+                "background-color": DEFAULTS.SKY_BLUE,
+                "world-size": DEFAULTS.world_size
             }
         )
 
@@ -130,35 +130,26 @@ class Scene(QGraphicsScene):
 
         for platform in new_data["platforms"]:
 
-            if platform["width"] is None:
-                width = self.data["types"][platform["type"]]["width"]
-            else:
-                width = platform["width"]
-
-            if platform["height"] is None:
-                height = self.data["types"][platform["type"]]["height"]
-            else:
-                height = platform["height"]
-
-            color = self.data["types"][platform["type"]]["color"]
-
             self.add_platform(platform["x"],
                               platform["y"],
-                              width,
-                              height,
-                              convert_color_to_hex(tuple(color)))
-            self.add_platform_to_design(self.design, platform["type"], platform["x"], platform["y"], platform["width"], platform["height"])
+                              platform["width"],
+                              platform["height"],
+                              convert_color_to_hex(tuple(platform["color"])))
+            self.add_platform_to_design(self.design, platform["type"],
+                                        platform["x"], platform["y"],
+                                        platform["width"], platform["height"],
+                                        platform["color"])
 
     # function that adds the default floor as to speed up the designing process
     def add_default_floor(self):
 
         # adding the default floor
-        floor_platform = self.data["types"]["FloorPlatform"]
-        self.floor = QGraphicsRectItem(0, GLOBALS.world_size[1] - GLOBALS.floor_height,
+        self.floor = QGraphicsRectItem(0, 0,
                                        self.design["rules"]["world-size"][0],
                                        self.design["rules"]["world-size"][1])
+        self.floor.setPos(0, DEFAULTS.world_size[1] - DEFAULTS.floor_height)
         self.floor.setPen(self.outlinepen)
-        self.floor.setBrush(QBrush(QColor(convert_color_to_hex(tuple(floor_platform["color"])))))
+        self.floor.setBrush(QBrush(QColor(convert_color_to_hex(tuple(DEFAULTS.platform_color)))))
         self.addItem(self.floor)
 
     # adds the background to the list of items being drawn by the canvas
@@ -216,10 +207,20 @@ class Scene(QGraphicsScene):
     # used to add the platform to the canvas scene when the mouse button is pressed
     def add_platform_to_scene(self, event, return_platform=False):
 
+        if self.placer_selected_platform is None:
+            return
+
         try:
             attributes = self.data["types"][self.placer_selected_platform]
         except KeyError:
-            return
+            try:
+                attributes = {
+                    "width": int(self.designer.entered_width.text()),
+                    "height": int(self.designer.entered_height.text()),
+                    "color": DEFAULTS.platform_color
+                }
+            except ValueError:
+                return
 
         pos = event.scenePos()
 
@@ -238,7 +239,7 @@ class Scene(QGraphicsScene):
     # handles the data and adds the platform that was placed to the
     # dictionary containing all information about the level that is
     # being currently built so that it can be exported later
-    def add_platform_to_design(self, design, platform_type, x, y, width, height):
+    def add_platform_to_design(self, design, platform_type, x, y, width, height, color):
 
         x, y = self.get_snap_coordinates(x, y)
 
@@ -248,7 +249,8 @@ class Scene(QGraphicsScene):
                 "x": x,
                 "y": y,
                 "width": width,
-                "height": height
+                "height": height,
+                "color": color
             }
         )
 
@@ -313,12 +315,26 @@ class Scene(QGraphicsScene):
     def mouse_press_placer_event(self, event):
         if self.placer_selected_platform is not None:
             self.add_platform_to_scene(event)
+
+            try:
+                platform = self.data["types"][self.placer_selected_platform]
+            except KeyError:
+                try:
+                    platform = {
+                        "width": int(self.designer.entered_width.text()),
+                        "height": int(self.designer.entered_height.text()),
+                        "color": DEFAULTS.platform_color
+                    }
+                except ValueError:
+                    return
+
             self.add_platform_to_design(self.design,
                                         self.placer_selected_platform,
                                         int(event.scenePos().x()),
                                         int(event.scenePos().y()),
-                                        None,
-                                        None)
+                                        platform["width"],
+                                        platform["height"],
+                                        platform["color"])
 
     # restoring color to any potential platforms that the user hovered over but
     # is no longer hovering over
@@ -442,7 +458,7 @@ class Designer(QWidget):
     def __init__(self, application):
         super(Designer, self).__init__()
 
-        with open("../platforms.json") as filename:
+        with open("platforms.json") as filename:
             self.data = json.load(filename)
 
         self.application = application
@@ -479,8 +495,17 @@ class Designer(QWidget):
 
         # set the button that was pressed to the flat state
         button.setFlat(True)
+
         # store the platform text of the selected platform type
         self.canvas_scene.placer_selected_platform = button.text()
+
+        # keep the width and height entries disabled unless needed
+        custom_list = ["CustomPlatform", "FloorPlatform"]
+        self.entered_width.setEnabled(button.text() in custom_list)
+        self.entered_height.setEnabled(button.text() in custom_list)
+
+
+
 
     # listens for the user to close the GUI and checks whether a save warning message should be applied
     def closeEvent(self, event):
@@ -492,8 +517,28 @@ class Designer(QWidget):
         else:
             event.accept()
 
+    def add_button_to_box_layout(self, text, box_layout):
+        button = QPushButton(text)
+        button.setStyleSheet("padding: 20px;")
+        # when the button is clicked, run a function that
+        # takes in that button and toggles it appropriately
+        button.clicked.connect(
+            lambda b=button: self.toggle_selection(b)
+        )
+        # throw the button into the selection list to have
+        # a reference to all generated buttons
+        self.selection.append(button)
+        box_layout.addWidget(button)
+
     # initializes the left frame which is composed of the prebuilt platform options
     def initialize_left_frame(self):
+
+        # custom group box creation
+        custom_section = QGroupBox()
+        custom_button_layout = QVBoxLayout()
+        self.add_button_to_box_layout("CustomPlatform", custom_button_layout)
+        self.add_button_to_box_layout("FloorPlatform", custom_button_layout)
+        custom_section.setLayout(custom_button_layout)
 
         # initialize a group box to place the platform buttons
         self.left_box = QGroupBox()
@@ -505,36 +550,18 @@ class Designer(QWidget):
         # for each type of platform, create a button and add it
         # to the vertical box layout
         for key in self.data["types"].keys():
-            button = QPushButton(str(key))
-            button.setStyleSheet("padding: 20px;")
-            # when the button is clicked, run a function that
-            # takes in that button and toggles it appropriately
-            button.clicked.connect(
-                lambda b=button: self.toggle_selection(b)
-            )
-            # throw the button into the selection list to have
-            # a reference to all generated buttons
-            self.selection.append(button)
-            form.addWidget(button)
+            self.add_button_to_box_layout(str(key), form)
 
         # create a scrollable area
         scroll_area = QScrollArea()
         # set the scrollable area to be the group box
         scroll_area.setWidget(self.left_box)
 
-        # getting the width and height of the respective scroll bars in
+        # getting the width of the respective scroll bar in
         # order to set the group box dimensions properly
         bar_width = scroll_area.verticalScrollBar().width()
-        bar_height = scroll_area.horizontalScrollBar().height()
 
-        # make sure that the height of the group box does not exceed the
-        # height of the canvas to maintain the desired aesthetics
-        # This is where the scroll bar will come in handy
-        if self.left_box.height() > GLOBALS.size[1]:
-            frame_height = GLOBALS.size[1]
-        else:
-            frame_height = self.left_box.height() + (bar_height / 1.25)
-
+        frame_height = DEFAULTS.screen_size[1]
         frame_width = self.left_box.width() + (bar_width / 2.22)
 
         # giving the left frame a fixed size so that it is not resizable
@@ -546,6 +573,32 @@ class Designer(QWidget):
         # defining a vertical layout for the scroll area since the scroll
         # area at this point contains the box widget
         layout = QVBoxLayout()
+
+        custom_area = QFrame()
+        custom_area.setLineWidth(1)
+        custom_layout = QVBoxLayout()
+
+        self.custom_entry = QWidget()
+        entry_layout = QHBoxLayout()
+
+        entry_layout.addWidget(QLabel("W: "))
+        self.entered_width = QLineEdit()
+        self.entered_width.setEnabled(False)
+        entry_layout.addWidget(self.entered_width)
+
+        entry_layout.addWidget(QLabel("H: "))
+        self.entered_height = QLineEdit()
+        self.entered_height.setEnabled(False)
+        entry_layout.addWidget(self.entered_height)
+
+        self.custom_entry.setLayout(entry_layout)
+
+        custom_layout.addWidget(self.custom_entry)
+        custom_layout.addWidget(custom_section)
+
+        custom_area.setLayout(custom_layout)
+
+        layout.addWidget(custom_area)
         layout.addWidget(scroll_area)
 
         # set the left frames layout to the vertical layout that contains
@@ -560,8 +613,8 @@ class Designer(QWidget):
         bar_width = self.canvas.verticalScrollBar().height()
         bar_height = self.canvas.horizontalScrollBar().height()
 
-        canvas_width = GLOBALS.size[0] + (bar_width / 1.25)
-        canvas_height = GLOBALS.size[1] + (bar_height / 1.25)
+        canvas_width = DEFAULTS.screen_size[0] + (bar_width / 1.25)
+        canvas_height = DEFAULTS.screen_size[1] + (bar_height / 1.25)
 
         self.canvas.setFixedSize(canvas_width, canvas_height)
         self.canvas.setMouseTracking(True)
@@ -808,10 +861,12 @@ class Designer(QWidget):
         if resize.isChecked():
             self.canvas_scene.remove_floor()
             self.canvas_scene.add_default_floor()
-            self.canvas_scene.add_platform_to_design(self.canvas_scene.design,
-                                                    "FloorPlatform",
-                                                    0, GLOBALS.world_size[1] - GLOBALS.floor_height,
-                                                    width, height)
+            self.canvas_scene.add_platform_to_design(
+                self.canvas_scene.design,
+                "FloorPlatform",
+                0, self.canvas_scene.design["rules"]["world-size"][1] - DEFAULTS.floor_height,
+                width, height, DEFAULTS.platform_color
+            )
         self.world_size_pop_up_window.close()
 
     def background_color_window(self):
@@ -955,7 +1010,7 @@ class Designer(QWidget):
             button.setFlat(False)
 
         self.canvas_scene.placer_selected_platform = None
-        self.left_box.setEnabled(placer.isChecked())
+        self.left_frame.setEnabled(placer.isChecked())
 
     # deselects the platform that is selected if it is selected
     def toggle_selector(self, selector):

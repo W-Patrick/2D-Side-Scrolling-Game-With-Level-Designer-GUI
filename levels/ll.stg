@@ -1,0 +1,147 @@
+{
+    "rules": {
+        "world-size": [
+            2400, 
+            600
+        ], 
+        "background-color": [
+            43, 
+            204, 
+            236
+        ]
+    }, 
+    "platforms": [
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 200, 
+            "width": 500, 
+            "y": 460, 
+            "x": 0, 
+            "type": "FloorPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 200, 
+            "width": 500, 
+            "y": 460, 
+            "x": 690, 
+            "type": "FloorPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 200, 
+            "width": 500, 
+            "y": 460, 
+            "x": 1390, 
+            "type": "FloorPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 200, 
+            "width": 500, 
+            "y": 460, 
+            "x": 2090, 
+            "type": "FloorPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 360, 
+            "x": 520, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 280, 
+            "x": 650, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 220, 
+            "x": 800, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 220, 
+            "x": 1190, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 220, 
+            "x": 1570, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 300, 
+            "x": 1960, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 370, 
+            "x": 2080, 
+            "type": "BoxPlatform"
+        }
+    ]
+}

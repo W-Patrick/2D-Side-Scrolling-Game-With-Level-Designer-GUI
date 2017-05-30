@@ -746,21 +746,14 @@ class StartGame:
 
         platforms = []
 
-        with open("platforms.json") as filename:
-            data = json.load(filename)
-
         # if in the rules, platforms_exist is false, these platforms
         # will not be generated. Otherwise all platforms that appear
         # in the game can be added into this platforms list
 
         for row in self.current_level["platforms"]:
-            if data["types"][row["type"]]["width"] is None and data["types"][row["type"]]["height"] is None:
+            if Rules.platforms_exist or row["type"] == "FloorPlatform":
                 platforms.append(
-                    Platform(groups, (row["x"], row["y"]), row["type"], row["width"], row["height"])
-                )
-            elif Rules.platforms_exist:
-                platforms.append(
-                    Platform(groups, (row["x"], row["y"]), row["type"])
+                    Platform(groups, (row["x"], row["y"]), row["type"], row["width"], row["height"], row["color"])
                 )
             else:
                 pass

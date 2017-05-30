@@ -1,32 +1,30 @@
 import pygame
-import json
+# import json
 from GLOBALS import BLACK
 
-class PlatformTypeException(Exception):
-    pass
+# class PlatformTypeException(Exception):
+#    pass
 
 
 # class to represent a platform
 class Platform(pygame.sprite.Sprite):
-    with open("platforms.json") as filename:
-        data = json.load(filename)
 
     def __init__(self, groups, rect, ptype=None, width=None, height=None, color=None):
         pygame.sprite.Sprite.__init__(self, groups.platforms, groups.scrolling_units)
 
-        if ptype is not None:
-            try:
-                attributes = self.data["types"][ptype]
-                if width is None:
-                    width = attributes["width"]
-
-                if height is None:
-                    height = attributes["height"]
-
-                if color is None:
-                    color = tuple(attributes["color"][i] for i in range(0, 3))
-            except:
-                raise PlatformTypeException("Couldn't load platform type - {}".format(ptype))
+        # if ptype is not None:
+        #    try:
+        #        attributes = self.data["types"][ptype]
+        #        if width is None:
+        #            width = attributes["width"]
+        #
+        #        if height is None:
+        #            height = attributes["height"]
+        #
+        #        if color is None:
+        #            color = tuple(attributes["color"][i] for i in range(0, 3))
+        #    except:
+        #        raise PlatformTypeException("Couldn't load platform type - {}".format(ptype))
 
         self.width = width
         self.height = height

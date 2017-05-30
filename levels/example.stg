@@ -1,92 +1,399 @@
 {
     "rules": {
         "world-size": [
-            2400, 
+            4800, 
             600
         ], 
         "background-color": [
-            57, 
-            255, 
-            189
+            139, 
+            103, 
+            255
         ]
     }, 
     "platforms": [
         {
-            "y": 260, 
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 800, 
+            "width": 200, 
+            "y": 140, 
             "x": 0, 
-            "height": null, 
-            "type": "ColumnPlatform", 
-            "width": null
+            "type": "ColumnPlatform"
         }, 
         {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 800, 
+            "width": 200, 
+            "y": 200, 
+            "x": 290, 
+            "type": "ColumnPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 800, 
+            "width": 200, 
             "y": 260, 
-            "x": 2200, 
-            "height": null, 
-            "type": "ColumnPlatform", 
-            "width": null
+            "x": 590, 
+            "type": "ColumnPlatform"
         }, 
         {
-            "y": 580, 
-            "x": 0, 
-            "height": 600, 
-            "type": "FloorPlatform", 
-            "width": 2400
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 800, 
+            "width": 200, 
+            "y": 200.0, 
+            "x": 880.0, 
+            "type": "ColumnPlatform"
         }, 
         {
-            "y": 320, 
-            "x": 200, 
-            "height": null, 
-            "type": "ColumnPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 200, 
+            "x": 1170, 
+            "type": "StandardPlatform"
         }, 
         {
-            "y": 360, 
-            "x": 400, 
-            "height": null, 
-            "type": "ColumnPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 200, 
+            "x": 1580, 
+            "type": "StandardPlatform"
         }, 
         {
-            "y": 360, 
-            "x": 600, 
-            "height": null, 
-            "type": "StandardPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 270, 
+            "x": 2000, 
+            "type": "StandardPlatform"
         }, 
         {
-            "y": 360, 
-            "x": 1200, 
-            "height": null, 
-            "type": "StandardPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 330, 
+            "x": 2370, 
+            "type": "BoxPlatform"
         }, 
         {
-            "y": 360.0, 
-            "x": 1500.0, 
-            "height": null, 
-            "type": "StandardPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 190, 
+            "x": 2500, 
+            "type": "BoxPlatform"
         }, 
         {
-            "y": 360, 
-            "x": 1020, 
-            "height": null, 
-            "type": "BoxPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 260, 
+            "x": 2440, 
+            "type": "BoxPlatform"
         }, 
         {
-            "y": 360, 
-            "x": 1850, 
-            "height": null, 
-            "type": "StandardPlatform", 
-            "width": null
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 260, 
+            "x": 2570, 
+            "type": "BoxPlatform"
         }, 
         {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 330, 
+            "x": 2650, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 340, 
+            "x": 2760, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
             "y": 290, 
-            "x": 2120, 
-            "height": null, 
-            "type": "BoxPlatform", 
-            "width": null
+            "x": 2850, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 240, 
+            "x": 2970, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 480, 
+            "x": 3100, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 430, 
+            "x": 3250, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 360, 
+            "x": 3390, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 360, 
+            "x": 3580, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 360, 
+            "x": 3790, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 450, 
+            "x": 3940, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 410, 
+            "x": 4130, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 350, 
+            "x": 4300, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 350, 
+            "x": 4480, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 350, 
+            "x": 4660, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 550, 
+            "x": 2760, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 550, 
+            "x": 2320, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 300, 
+            "y": 550, 
+            "x": 1890, 
+            "type": "StandardPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 490, 
+            "x": 1760, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 420, 
+            "x": 1900, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 310, 
+            "x": 1850, 
+            "type": "BoxPlatform"
+        }, 
+        {
+            "color": [
+                50, 
+                120, 
+                60
+            ], 
+            "height": 30, 
+            "width": 60, 
+            "y": 360, 
+            "x": 1980, 
+            "type": "BoxPlatform"
         }
     ]
 }
