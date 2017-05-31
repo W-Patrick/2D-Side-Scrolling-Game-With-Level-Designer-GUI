@@ -575,7 +575,6 @@ class Designer(QWidget):
         layout = QVBoxLayout()
 
         custom_area = QFrame()
-        custom_area.setLineWidth(1)
         custom_layout = QVBoxLayout()
 
         self.custom_entry = QWidget()
@@ -963,6 +962,19 @@ class Designer(QWidget):
         self.edit_menu.addAction(world_size_adjustment)
         self.edit_menu.addAction(delete)
 
+    def add_to_platforms_window(self):
+        pass
+
+    # initializes the config menu and all of its actions
+    def initialize_config_menu(self):
+
+        self.config_menu = self.main_menu.addMenu('&Config.')
+
+        add_to_platforms = QAction('Add To Existing Platforms', self)
+        add_to_platforms.triggered.connect(lambda: self.add_to_platforms_window)
+
+        self.config_menu.addAction(add_to_platforms)
+
     # initializes the menu bar and adds it to the GUI
     def initialize_menubar(self):
 
@@ -970,6 +982,7 @@ class Designer(QWidget):
 
         self.initialize_file_menu()
         self.initialize_edit_menu()
+        self.initialize_config_menu()
 
         self.main_layout.addWidget(self.main_menu)
 
